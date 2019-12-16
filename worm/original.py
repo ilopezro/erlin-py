@@ -239,15 +239,15 @@ def showMenu():
         event = checkForKeyPress()
         print(event)
         if event:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1:
+            # if event.type == pygame.KEYDOWN:
+                if event == K_1:
                     print("User pressed Number 1")
-                    return True
-                if event.key == pygame.K_2:
+                    return
+                if event == K_2:
                     print("User pressed Number 2")
-                    showHighScores()
-                    return False
-                if event.key == pygame.K_3:
+                    # showHighScores()
+                    return
+                if event == K_3:
                     print("User pressed Number 3")
                     terminate()
 
