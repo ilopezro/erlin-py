@@ -232,24 +232,30 @@ def showMenu():
     # drawPresskeyMSG
     pygame.display.update()
     pygame.time.wait(500)
-    checkForKeyPress()
 
     # process menu items
     while True:
+        errorMessage = menuFont.render("Pressed invalid key. Try again.", True, BLACK)
+        DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 150))
+        pygame.display.update()
         event = checkForKeyPress()
-        print(event)
         if event:
-            # if event.type == pygame.KEYDOWN:
-                if event == K_1:
-                    print("User pressed Number 1")
-                    return
-                if event == K_2:
-                    print("User pressed Number 2")
-                    # showHighScores()
-                    return
-                if event == K_3:
-                    print("User pressed Number 3")
-                    terminate()
+            if event == K_1:
+                print("User pressed Number 1")
+                return
+            if event == K_2:
+                print("User pressed Number 2")
+                # showHighScores()
+                return
+            if event == K_3:
+                print("User pressed Number 3")
+                terminate()
+            else:
+                errorMessage = menuFont.render("Pressed invalid key. Try again.", True, WHITE)
+                DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 150))
+                pygame.display.update()
+                pygame.time.wait(1000)
+                continue
 
 
 def drawWorm(wormCoords):
