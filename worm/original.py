@@ -25,6 +25,7 @@ WHITE     = (255, 255, 255)
 BLACK     = (  0,   0,   0)
 RED       = (255,   0,   0)
 GREEN     = (  0, 255,   0)
+BLUE      = ( 0,    0, 255)
 DARKGREEN = (  0, 155,   0)
 DARKGRAY  = ( 40,  40,  40)
 BGCOLOR = BLACK
@@ -36,11 +37,11 @@ LEFT = "left"
 RIGHT = "right"
 
 HEAD = 0 # syntactic sugar: index of the worm"s head
-
+SCORE = []
+LIVES = 5
 
 def main():
-    global FPSCLOCK, DISPLAYSURF, BASICFONT
-
+    global FPSCLOCK, DISPLAYSURF, BASICFONT, SCORE, LIVES
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
 
@@ -58,11 +59,21 @@ def main():
     showMenu()
 
     # run until user exits program
-    while True:
-        runGame()
-        showGameOverScreen()
+    while LIVES >= 0:
+        scoreOfGame = runGame()
+        pygame.time.wait(500)
+        SCORE.append(scoreOfGame)
+        SCORE.sort(reverse=True)
+        if len(SCORE) > 5:
+            SCORE.pop(-1)
+        if(LIVES == 0):
+            showGameOverScreen()
+            pygame.time.wait(500)
+            showMenu()
 
 def runGame():
+    global LIVES
+    isSpecialApple = False
     # Set a random start point.
     startx = random.randint(5, CELLWIDTH - 6)
     starty = random.randint(5, CELLHEIGHT - 6)
@@ -94,15 +105,19 @@ def runGame():
 
         # check if the worm has hit itself or the edge
         if wormCoords[HEAD]["x"] == -1 or wormCoords[HEAD]["x"] == CELLWIDTH or wormCoords[HEAD]["y"] == -1 or wormCoords[HEAD]["y"] == CELLHEIGHT:
-            return # game over
+            LIVES -= 1
+            return len(wormCoords) - 3 # game over
 
         for wormBody in wormCoords[1:]:
             if wormBody["x"] == wormCoords[HEAD]["x"] and wormBody["y"] == wormCoords[HEAD]["y"]:
-                return # game over
+                LIVES -= 1
+                return len(wormCoords) - 3 # game over
 
         # check if worm has eaten an apple
         if wormCoords[HEAD]["x"] == apple["x"] and wormCoords[HEAD]["y"] == apple["y"]:
             # don"t remove worm"s tail segment
+            if isSpecialApple:
+                LIVES += 1
             apple = getRandomLocation() # set a new apple somewhere
         else:
             del wormCoords[-1] # remove worm"s tail segment
@@ -125,8 +140,15 @@ def runGame():
         DISPLAYSURF.fill(BGCOLOR)
         drawGrid()
         drawWorm(wormCoords)
-        drawApple(apple)
+        if (len(wormCoords) - 3) % 5 == 0 and (len(wormCoords) - 3) != 0:
+            drawSpecialApple(apple)
+            isSpecialApple = True
+        else:
+            isSpecialApple = False
+            drawApple(apple)
+
         drawScore(len(wormCoords) - 3)
+        drawLives()
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
@@ -211,10 +233,16 @@ def showGameOverScreen():
             return
 
 def drawScore(score):
-    scoreSurf = BASICFONT.render("Score: %s" % (score), True, WHITE)
+    scoreSurf = BASICFONT.render("Score: %s" % score, True, WHITE)
     scoreRect = scoreSurf.get_rect()
     scoreRect.topleft = (WINDOWWIDTH - 120, 10)
     DISPLAYSURF.blit(scoreSurf, scoreRect)
+
+def drawLives():
+    livesSurf = BASICFONT.render("Lives: %s" % LIVES, True, WHITE)
+    livesRect = livesSurf.get_rect()
+    livesRect.topleft = (WINDOWWIDTH - 200, 10)
+    DISPLAYSURF.blit(livesSurf, livesRect)
 
 def showMenu():
     DISPLAYSURF.fill(BGCOLOR)
@@ -245,7 +273,7 @@ def showMenu():
                 return
             if event == K_2:
                 print("User pressed Number 2")
-                # showHighScores()
+                showHighScores()
                 return
             if event == K_3:
                 print("User pressed Number 3")
@@ -254,7 +282,63 @@ def showMenu():
                 errorMessage = menuFont.render("Pressed invalid key. Try again.", True, WHITE)
                 DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 150))
                 pygame.display.update()
-                pygame.time.wait(1000)
+                pygame.time.wait(500)
+                continue
+
+def showHighScores():
+    global LIVES
+    DISPLAYSURF.fill(BGCOLOR)
+    menuFont = pygame.font.Font("freesansbold.ttf", 20)
+    highScoreMessage = menuFont.render("Current High Scores", True, WHITE)
+    DISPLAYSURF.blit(highScoreMessage, (WINDOWWIDTH / 2 - 100, 10))
+    pygame.display.update()
+    pygame.time.wait(500)
+
+    if len(SCORE) == 0:
+        highScoreMessage = menuFont.render("No Scores Available Right Now", True, WHITE)
+        DISPLAYSURF.blit(highScoreMessage, (WINDOWWIDTH / 2 - 130, 60))
+        pygame.display.update()
+    else:
+        SCORE.sort(reverse=True)
+        startHeight = 50;
+        counter = 1;
+        for i in SCORE:
+            highScoreMessage = menuFont.render("%d: %d" % (counter, i), True, WHITE)
+            DISPLAYSURF.blit(highScoreMessage, (WINDOWWIDTH / 2 - 30, startHeight))
+            pygame.display.update()
+            startHeight += 30;
+            counter += 1;
+
+    menuItem1 = menuFont.render("1. Go Back", True, WHITE)
+    DISPLAYSURF.blit(menuItem1, (WINDOWWIDTH / 2 - 150, 230))
+
+    menuItem2 = menuFont.render("2. Play On", True, WHITE)
+    DISPLAYSURF.blit(menuItem2, (WINDOWWIDTH / 2 + 30, 230))
+
+    menuItem3 = menuFont.render("3. Quit", True, WHITE)
+    DISPLAYSURF.blit(menuItem3, (WINDOWWIDTH / 2 - 40, 260))
+    pygame.display.update()
+
+    while True:
+        errorMessage = menuFont.render("Pressed invalid key. Try again.", True, BLACK)
+        DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 300))
+        pygame.display.update()
+        event = checkForKeyPress()
+        if event:
+            if event == K_1:
+                showMenu()
+                return
+            if event == K_2:
+                LIVES = 5
+                return
+            if event == K_3:
+                print("User pressed Number 3")
+                terminate()
+            else:
+                errorMessage = menuFont.render("Pressed invalid key. Try again.", True, WHITE)
+                DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 300))
+                pygame.display.update()
+                pygame.time.wait(500)
                 continue
 
 
@@ -273,6 +357,12 @@ def drawApple(coord):
     y = coord["y"] * CELLSIZE
     appleRect = pygame.Rect(x, y, CELLSIZE, CELLSIZE)
     pygame.draw.rect(DISPLAYSURF, RED, appleRect)
+
+def drawSpecialApple(coord):
+    x = coord["x"] * CELLSIZE
+    y = coord["y"] * CELLSIZE
+    appleRect = pygame.Rect(x, y, CELLSIZE, CELLSIZE)
+    pygame.draw.rect(DISPLAYSURF, BLUE, appleRect)
 
 
 def drawGrid():
