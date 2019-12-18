@@ -21,13 +21,13 @@ CELLHEIGHT = int(WINDOWHEIGHT / CELLSIZE)
 
 # set colors
 #             R    G    B
-WHITE     = (255, 255, 255)
-BLACK     = (  0,   0,   0)
-RED       = (255,   0,   0)
-GREEN     = (  0, 255,   0)
-BLUE      = ( 0,    0, 255)
-DARKGREEN = (  0, 155,   0)
-DARKGRAY  = ( 40,  40,  40)
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+DARKGREEN = (0, 155, 0)
+DARKGRAY = (40, 40, 40)
 BGCOLOR = BLACK
 
 # direction variables
@@ -36,9 +36,10 @@ DOWN = "down"
 LEFT = "left"
 RIGHT = "right"
 
-HEAD = 0 # syntactic sugar: index of the worm"s head
+HEAD = 0  # syntactic sugar: index of the worm"s head
 SCORE = []
 LIVES = 5
+
 
 def main():
     global FPSCLOCK, DISPLAYSURF, BASICFONT, SCORE, LIVES
@@ -66,10 +67,14 @@ def main():
         SCORE.sort(reverse=True)
         if len(SCORE) > 5:
             SCORE.pop(-1)
-        if(LIVES == 0):
+        if (LIVES == 0):
             showGameOverScreen()
             pygame.time.wait(500)
             showMenu()
+
+
+# def drawCrawlingWorm():
+
 
 def runGame():
     global LIVES
@@ -79,7 +84,7 @@ def runGame():
     starty = random.randint(5, CELLHEIGHT - 6)
 
     # create a l
-    wormCoords = [{"x": startx,     "y": starty},
+    wormCoords = [{"x": startx, "y": starty},
                   {"x": startx - 1, "y": starty},
                   {"x": startx - 2, "y": starty}]
     direction = RIGHT
@@ -87,8 +92,8 @@ def runGame():
     # Start the apple in a random place.
     apple = getRandomLocation()
 
-    while True: # main game loop
-        for event in pygame.event.get(): # event handling loop
+    while True:  # main game loop
+        for event in pygame.event.get():  # event handling loop
             if event.type == QUIT:
                 terminate()
             elif event.type == KEYDOWN:
@@ -104,23 +109,24 @@ def runGame():
                     terminate()
 
         # check if the worm has hit itself or the edge
-        if wormCoords[HEAD]["x"] == -1 or wormCoords[HEAD]["x"] == CELLWIDTH or wormCoords[HEAD]["y"] == -1 or wormCoords[HEAD]["y"] == CELLHEIGHT:
+        if wormCoords[HEAD]["x"] == -1 or wormCoords[HEAD]["x"] == CELLWIDTH or wormCoords[HEAD]["y"] == -1 or \
+                wormCoords[HEAD]["y"] == CELLHEIGHT:
             LIVES -= 1
-            return len(wormCoords) - 3 # game over
+            return len(wormCoords) - 3  # game over
 
         for wormBody in wormCoords[1:]:
             if wormBody["x"] == wormCoords[HEAD]["x"] and wormBody["y"] == wormCoords[HEAD]["y"]:
                 LIVES -= 1
-                return len(wormCoords) - 3 # game over
+                return len(wormCoords) - 3  # game over
 
         # check if worm has eaten an apple
         if wormCoords[HEAD]["x"] == apple["x"] and wormCoords[HEAD]["y"] == apple["y"]:
             # don"t remove worm"s tail segment
             if isSpecialApple:
                 LIVES += 1
-            apple = getRandomLocation() # set a new apple somewhere
+            apple = getRandomLocation()  # set a new apple somewhere
         else:
-            del wormCoords[-1] # remove worm"s tail segment
+            del wormCoords[-1]  # remove worm"s tail segment
 
         # move the worm by adding a segment in the direction it is moving
         if direction == UP:
@@ -140,6 +146,7 @@ def runGame():
         DISPLAYSURF.fill(BGCOLOR)
         drawGrid()
         drawWorm(wormCoords)
+        drawWorm(creeperWormCoords)
         if (len(wormCoords) - 3) % 5 == 0 and (len(wormCoords) - 3) != 0:
             drawSpecialApple(apple)
             isSpecialApple = True
@@ -151,6 +158,7 @@ def runGame():
         drawLives()
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+
 
 def drawPressKeyMsg():
     pressKeySurf = BASICFONT.render("Press a key to play.", True, DARKGRAY)
@@ -193,13 +201,13 @@ def showStartScreen():
         drawPressKeyMsg()
 
         if checkForKeyPress():
-            pygame.event.get() # clear event queue
+            pygame.event.get()  # clear event queue
             return
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
-        degrees1 += 3 # rotate by 3 degrees each frame
-        degrees2 += 7 # rotate by 7 degrees each frame
+        degrees1 += 3  # rotate by 3 degrees each frame
+        degrees2 += 7  # rotate by 7 degrees each frame
 
 
 def terminate():
@@ -225,12 +233,13 @@ def showGameOverScreen():
     drawPressKeyMsg()
     pygame.display.update()
     pygame.time.wait(500)
-    checkForKeyPress() # clear out any key presses in the event queue
+    checkForKeyPress()  # clear out any key presses in the event queue
 
     while True:
         if checkForKeyPress():
-            pygame.event.get() # clear event queue
+            pygame.event.get()  # clear event queue
             return
+
 
 def drawScore(score):
     scoreSurf = BASICFONT.render("Score: %s" % score, True, WHITE)
@@ -238,11 +247,13 @@ def drawScore(score):
     scoreRect.topleft = (WINDOWWIDTH - 120, 10)
     DISPLAYSURF.blit(scoreSurf, scoreRect)
 
+
 def drawLives():
     livesSurf = BASICFONT.render("Lives: %s" % LIVES, True, WHITE)
     livesRect = livesSurf.get_rect()
     livesRect.topleft = (WINDOWWIDTH - 200, 10)
     DISPLAYSURF.blit(livesSurf, livesRect)
+
 
 def showMenu():
     DISPLAYSURF.fill(BGCOLOR)
@@ -269,7 +280,7 @@ def showMenu():
         event = checkForKeyPress()
         if event:
             if event == K_1:
-                print("User pressed Number 1")
+                chooseDifficultyLevel()
                 return
             if event == K_2:
                 print("User pressed Number 2")
@@ -284,6 +295,7 @@ def showMenu():
                 pygame.display.update()
                 pygame.time.wait(500)
                 continue
+
 
 def showHighScores():
     global LIVES
@@ -330,10 +342,65 @@ def showHighScores():
                 return
             if event == K_2:
                 LIVES = 5
+                chooseDifficultyLevel()
                 return
             if event == K_3:
                 print("User pressed Number 3")
                 terminate()
+            else:
+                errorMessage = menuFont.render("Pressed invalid key. Try again.", True, WHITE)
+                DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 300))
+                pygame.display.update()
+                pygame.time.wait(500)
+                continue
+
+
+def chooseDifficultyLevel():
+    global FPS
+    DISPLAYSURF.fill(BGCOLOR)
+    menuFont = pygame.font.Font("freesansbold.ttf", 20)
+    highScoreMessage = menuFont.render("Choose Difficulty Level:", True, WHITE)
+    DISPLAYSURF.blit(highScoreMessage, (WINDOWWIDTH / 2 - 100, 10))
+    pygame.display.update()
+    pygame.time.wait(500)
+
+    menuItem1 = menuFont.render("1. Easy", True, WHITE)
+    DISPLAYSURF.blit(menuItem1, (WINDOWWIDTH / 2 - 40, 50))
+
+    menuItem2 = menuFont.render("2. Medium", True, WHITE)
+    DISPLAYSURF.blit(menuItem2, (WINDOWWIDTH / 2 - 40, 80))
+
+    menuItem3 = menuFont.render("3. Hard", True, WHITE)
+    DISPLAYSURF.blit(menuItem3, (WINDOWWIDTH / 2 - 40, 110))
+    pygame.display.update()
+
+    while True:
+        errorMessage = menuFont.render("Pressed invalid key. Try again.", True, BLACK)
+        DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 300))
+        pygame.display.update()
+        event = checkForKeyPress()
+        if event:
+            if event == K_1:
+                FPS = 10
+                fpsChoice = menuFont.render("You chose the easy level. Let's go!", True, WHITE)
+                DISPLAYSURF.blit(fpsChoice, (WINDOWWIDTH / 2 - 140, 150))
+                pygame.display.update()
+                pygame.time.wait(2000)
+                return
+            if event == K_2:
+                FPS = 15
+                fpsChoice = menuFont.render("You chose the medium level. Let's go!", True, WHITE)
+                DISPLAYSURF.blit(fpsChoice, (WINDOWWIDTH / 2 - 140, 150))
+                pygame.display.update()
+                pygame.time.wait(2000)
+                return
+            if event == K_3:
+                FPS = 20
+                fpsChoice = menuFont.render("You chose the hard level. Let's go!", True, WHITE)
+                DISPLAYSURF.blit(fpsChoice, (WINDOWWIDTH / 2 - 140, 150))
+                pygame.display.update()
+                pygame.time.wait(200)
+                return
             else:
                 errorMessage = menuFont.render("Pressed invalid key. Try again.", True, WHITE)
                 DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 300))
@@ -358,6 +425,7 @@ def drawApple(coord):
     appleRect = pygame.Rect(x, y, CELLSIZE, CELLSIZE)
     pygame.draw.rect(DISPLAYSURF, RED, appleRect)
 
+
 def drawSpecialApple(coord):
     x = coord["x"] * CELLSIZE
     y = coord["y"] * CELLSIZE
@@ -366,9 +434,9 @@ def drawSpecialApple(coord):
 
 
 def drawGrid():
-    for x in range(0, WINDOWWIDTH, CELLSIZE): # draw vertical lines
+    for x in range(0, WINDOWWIDTH, CELLSIZE):  # draw vertical lines
         pygame.draw.line(DISPLAYSURF, DARKGRAY, (x, 0), (x, WINDOWHEIGHT))
-    for y in range(0, WINDOWHEIGHT, CELLSIZE): # draw horizontal lines
+    for y in range(0, WINDOWHEIGHT, CELLSIZE):  # draw horizontal lines
         pygame.draw.line(DISPLAYSURF, DARKGRAY, (0, y), (WINDOWWIDTH, y))
 
 
