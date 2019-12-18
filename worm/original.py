@@ -299,7 +299,7 @@ def showMenu():
 
 
 def showHighScores():
-    global LIVES
+    global LIVES, SCORE
     DISPLAYSURF.fill(BGCOLOR)
     menuFont = pygame.font.Font("freesansbold.ttf", 20)
     highScoreMessage = menuFont.render("Current High Scores", True, WHITE)
@@ -307,52 +307,148 @@ def showHighScores():
     pygame.display.update()
     pygame.time.wait(500)
 
-    SCORE.sort(reverse=True)
-    unDuplicatedList = list(dict.fromkeys(SCORE))
+    printScores(menuFont)
 
-    if len(unDuplicatedList) == 0:
+    menuItem1 = menuFont.render("1. Go Back", True, WHITE)
+    DISPLAYSURF.blit(menuItem1, (WINDOWWIDTH / 2 - 150, 260))
+
+    menuItem2 = menuFont.render("2. Play On", True, WHITE)
+    DISPLAYSURF.blit(menuItem2, (WINDOWWIDTH / 2 + 30, 260))
+
+    menuItem3 = menuFont.render("3. Delete Score", True, WHITE)
+    DISPLAYSURF.blit(menuItem3, (WINDOWWIDTH / 2 - 150, 290))
+
+    menuItem4 = menuFont.render("Q. Quit", True, WHITE)
+    DISPLAYSURF.blit(menuItem4, (WINDOWWIDTH / 2 + 30, 290))
+    pygame.display.update()
+
+    while True:
+        errorMessage = menuFont.render("Pressed invalid key. Try again.", True, BLACK)
+        DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 390))
+        blockMssg = menuFont.render("Cannot delete from empty list.", True, BLACK)
+        DISPLAYSURF.blit(blockMssg, (WINDOWWIDTH / 2 - 130, 360))
+        menuItem5 = menuFont.render("C. Cancel", True, BLACK)
+        DISPLAYSURF.blit(menuItem5, (WINDOWWIDTH / 2 - 40, 320))
+        enterMssg = menuFont.render("Enter line num of score you want to delete.", True, BLACK)
+        DISPLAYSURF.blit(enterMssg, (WINDOWWIDTH / 2 - 190, 340))
+        pygame.display.update()
+        event = checkForKeyPress()
+        SCORE.sort(reverse=True)
+        SCORE = list(dict.fromkeys(SCORE))
+        if event:
+            if event == K_1:
+                showMenu()
+                return
+            elif event == K_2:
+                LIVES = 5
+                chooseDifficultyLevel()
+                return
+            elif event == K_3:
+                if len(SCORE) == 0:
+                    errMssg = menuFont.render("Cannot delete from empty list.", True, WHITE)
+                    DISPLAYSURF.blit(errMssg, (WINDOWWIDTH / 2 - 130, 360))
+                    pygame.display.update()
+                    pygame.time.wait(1000)
+                    continue
+                else:
+                    menuItem5 = menuFont.render("C. Cancel", True, WHITE)
+                    DISPLAYSURF.blit(menuItem5, (WINDOWWIDTH / 2 - 40, 320))
+                    enterMssg = menuFont.render("Enter line num of score you want to delete.", True, WHITE)
+                    DISPLAYSURF.blit(enterMssg, (WINDOWWIDTH / 2 - 190, 340))
+                    pygame.display.update()
+                    chooseScoreToDel(menuFont)
+                    showHighScores()
+            elif event == K_q:
+                terminate()
+            else:
+                errorMessage = menuFont.render("Pressed invalid key. Try again.", True, WHITE)
+                DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 390))
+                pygame.display.update()
+                pygame.time.wait(500)
+                continue
+
+
+def printScores(menuFont):
+    global SCORE
+    SCORE.sort(reverse=True)
+    SCORE = list(dict.fromkeys(SCORE))
+
+    if len(SCORE) == 0:
         highScoreMessage = menuFont.render("No Scores Available Right Now", True, WHITE)
         DISPLAYSURF.blit(highScoreMessage, (WINDOWWIDTH / 2 - 130, 60))
         pygame.display.update()
     else:
         startHeight = 50;
         counter = 1;
-        for i in unDuplicatedList:
+        for i in SCORE:
             highScoreMessage = menuFont.render("%d: %d" % (counter, i), True, WHITE)
             DISPLAYSURF.blit(highScoreMessage, (WINDOWWIDTH / 2 - 30, startHeight))
             pygame.display.update()
             startHeight += 30;
             counter += 1;
 
-    menuItem1 = menuFont.render("1. Go Back", True, WHITE)
-    DISPLAYSURF.blit(menuItem1, (WINDOWWIDTH / 2 - 150, 230))
 
-    menuItem2 = menuFont.render("2. Play On", True, WHITE)
-    DISPLAYSURF.blit(menuItem2, (WINDOWWIDTH / 2 + 30, 230))
-
-    menuItem3 = menuFont.render("3. Quit", True, WHITE)
-    DISPLAYSURF.blit(menuItem3, (WINDOWWIDTH / 2 - 40, 260))
-    pygame.display.update()
-
+def chooseScoreToDel(menuFont):
+    global SCORE
+    SCORE.sort(reverse=True)
+    SCORE = list(dict.fromkeys(SCORE))
     while True:
         errorMessage = menuFont.render("Pressed invalid key. Try again.", True, BLACK)
-        DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 300))
+        DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 390))
+        errorMessage = menuFont.render("Cannot delete given index. ", True, BLACK)
+        DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 410))
         pygame.display.update()
         event = checkForKeyPress()
         if event:
             if event == K_1:
-                showMenu()
+                SCORE.pop(0)
                 return
-            if event == K_2:
-                LIVES = 5
-                chooseDifficultyLevel()
+            elif event == K_2:
+                if len(SCORE) < 2:
+                    errorMessage = menuFont.render("Cannot delete given index. ", True, WHITE)
+                    DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 410))
+                    pygame.display.update()
+                    pygame.time.wait(1000)
+                    continue
+                else:
+                    SCORE.pop(1)
                 return
-            if event == K_3:
-                print("User pressed Number 3")
+            elif event == K_3:
+                if len(SCORE) < 3:
+                    errorMessage = menuFont.render("Cannot delete given index. ", True, WHITE)
+                    DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 410))
+                    pygame.display.update()
+                    pygame.time.wait(1000)
+                    continue
+                else:
+                    SCORE.pop(2)
+                return
+            elif event == K_4:
+                if len(SCORE) < 4:
+                    errorMessage = menuFont.render("Cannot delete given index. ", True, WHITE)
+                    DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 410))
+                    pygame.display.update()
+                    pygame.time.wait(1000)
+                    continue
+                else:
+                    SCORE.pop(3)
+                return
+            elif event == K_5:
+                if len(SCORE) < 5:
+                    errorMessage = menuFont.render("Cannot delete given index. ", True, WHITE)
+                    DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 410))
+                    pygame.display.update()
+                    pygame.time.wait(1000)
+                    continue
+                else:
+                    SCORE.pop(4)
+            elif event == K_c:
+                return
+            elif event == K_q:
                 terminate()
             else:
                 errorMessage = menuFont.render("Pressed invalid key. Try again.", True, WHITE)
-                DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 300))
+                DISPLAYSURF.blit(errorMessage, (WINDOWWIDTH / 2 - 130, 390))
                 pygame.display.update()
                 pygame.time.wait(500)
                 continue
