@@ -146,7 +146,6 @@ def runGame():
         DISPLAYSURF.fill(BGCOLOR)
         drawGrid()
         drawWorm(wormCoords)
-        drawWorm(creeperWormCoords)
         if (len(wormCoords) - 3) % 5 == 0 and (len(wormCoords) - 3) != 0:
             drawSpecialApple(apple)
             isSpecialApple = True
@@ -256,6 +255,7 @@ def drawLives():
 
 
 def showMenu():
+    global LIVES
     DISPLAYSURF.fill(BGCOLOR)
     menuFont = pygame.font.Font("freesansbold.ttf", 20)
 
@@ -280,14 +280,15 @@ def showMenu():
         event = checkForKeyPress()
         if event:
             if event == K_1:
+                LIVES = 5
                 chooseDifficultyLevel()
                 return
             if event == K_2:
-                print("User pressed Number 2")
+                LIVES = 5
                 showHighScores()
                 return
             if event == K_3:
-                print("User pressed Number 3")
+                LIVES = 5
                 terminate()
             else:
                 errorMessage = menuFont.render("Pressed invalid key. Try again.", True, WHITE)
