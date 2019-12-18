@@ -307,15 +307,17 @@ def showHighScores():
     pygame.display.update()
     pygame.time.wait(500)
 
-    if len(SCORE) == 0:
+    SCORE.sort(reverse=True)
+    unDuplicatedList = list(dict.fromkeys(SCORE))
+
+    if len(unDuplicatedList) == 0:
         highScoreMessage = menuFont.render("No Scores Available Right Now", True, WHITE)
         DISPLAYSURF.blit(highScoreMessage, (WINDOWWIDTH / 2 - 130, 60))
         pygame.display.update()
     else:
-        SCORE.sort(reverse=True)
         startHeight = 50;
         counter = 1;
-        for i in SCORE:
+        for i in unDuplicatedList:
             highScoreMessage = menuFont.render("%d: %d" % (counter, i), True, WHITE)
             DISPLAYSURF.blit(highScoreMessage, (WINDOWWIDTH / 2 - 30, startHeight))
             pygame.display.update()
